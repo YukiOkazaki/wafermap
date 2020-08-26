@@ -279,7 +279,7 @@ def rand_ints_nodup(a, b, k):
 # In[23]:
 
 
-testsize = 2000
+testsize = 500
 randlist = rand_ints_nodup(0, new_x.shape[0]-1, testsize)
 
 
@@ -315,17 +315,17 @@ y = np.delete(y, randlist, axis=0)
 # In[27]:
 
 
-# testsize = 2000
-# randlist = rand_ints_nodup(0, new_x.shape[0]-1, testsize)
+testsize = 1000
+randlist = rand_ints_nodup(0, new_x.shape[0]-1, testsize)
 
-# valx = new_x.copy()[randlist, :, :, :]
-# valy = y.copy()[randlist, :]
+valx = new_x.copy()[randlist, :, :, :]
+valy = y.copy()[randlist, :]
 
-# for f in faulty_case :
-#     print('{} : {}'.format(f, len(tempy[tempy==f])))
+for f in faulty_case :
+    print('{} : {}'.format(f, len(tempy[tempy==f])))
     
-# new_x = np.delete(new_x, randlist, axis=0)
-# y = np.delete(y, randlist, axis=0)
+new_x = np.delete(new_x, randlist, axis=0)
+y = np.delete(y, randlist, axis=0)
 
 
 # ### オートエンコーダで学習
@@ -560,10 +560,10 @@ def gen_data(wafer, label):
     gen_x = np.zeros((1, 26, 26, 3))
     aug_x = np.zeros((1, 26, 26, 3))
     
-    flipflag = False
+    flipflag = True
     noiseflag = True
 
-    ite = 1 if label != 'none' else 1
+    ite = 10 if label != 'none' else 1
     for i in range(len(wafer)):
         for j in range(ite):
 #             rotatedata = wafer[i].reshape(1, 26, 26, 3)
@@ -600,7 +600,7 @@ def gen_data(wafer, label):
 #     else:
 #         gen_x = aug_x
 
-    for i in range((13000//len(encoded_x)) + 1):
+    for i in range((30000//len(encoded_x)) + 1):
         if noiseflag:
             noised_encoded_x = encoded_x + np.random.normal(loc=0, scale=0.1, size = (len(encoded_x), 13, 13, 64)) 
         else :
@@ -749,7 +749,7 @@ plt.show()'''
 for i, l in enumerate(faulty_case):
     new_y[new_y==l] = i
     tempy[tempy==l] = i
-#     valy[valy==l] = i
+    valy[valy==l] = i
 
 
 # In[51]:
@@ -758,7 +758,7 @@ for i, l in enumerate(faulty_case):
 # one-hot-encoding
 new_y = to_categorical(new_y)
 tempy = to_categorical(tempy)
-# valy = to_categorical(valy)
+valy = to_categorical(valy)
 
 
 # In[52]:
@@ -782,10 +782,10 @@ x_train, x_test, y_train, y_test = train_test_split(new_X, new_Y,
 # y_train = new_Y
 # y_test = tempy
 
-# x_train = new_X
-# x_test = valx
-# y_train = new_Y
-# y_test = valy
+x_train = new_X
+x_test = valx
+y_train = new_Y
+y_test = valy
 
 
 # In[54]:
@@ -864,6 +864,7 @@ score = model.score(x_test, y_test)
 #print('Test Loss:', score[0])
 #print('Test accuracy:', score[1])
 print('Testing Accuracy:',score)
+valiscore = score
 
 
 # - データオーギュメンテーションなしの実データで評価
@@ -875,6 +876,7 @@ score = model.score(tempx, tempy)
 #print('Test Loss:', score[0])
 #print('Test accuracy:', score[1])
 print('Testing Accuracy:',score)
+testscore = score
 
 
 # - acuurayは99.70%であった．
@@ -934,6 +936,7 @@ print('Training acc: {}'.format(train_acc2*100))
 print('Testing acc: {}'.format(test_acc2*100))
 print("y_train_pred[:100]: ", y_train_pred[:100])
 print ("y_train_max[:100]: ", y_train_max[:100])
+trainscore = train_acc2
 
 
 # ### 混同行列
@@ -1138,4 +1141,5 @@ def line_notify(text):
     requests.post(url, data=data, headers=headers, proxies=proxies)
     
 line_notify("学習が終了しました")
+line_notify("train:" + str(trainscore) + "\nvali:" + str(valiscore) + "\ntest:" + str(testscore))
 
