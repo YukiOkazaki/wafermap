@@ -34,7 +34,8 @@ for dirname, _, filenames in os.walk('../input'):
 
 import os
 from os.path import join
-os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+# os.environ["CUDA_VISIBLE_DEVICES"] = "0,1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
 
 import csv
 
@@ -85,10 +86,10 @@ warnings.filterwarnings("ignore")
 
 
 # Define
-max_size = 300
+max_size = 100
 encord_size = int(max_size / 2)
 
-NOTEBOOK_NAME = 'wafermap_multisize_train'
+NOTEBOOK_NAME = 'wafermap_multisize_train_script'
 cnn_path = './model/cnn_' + str(max_size) + '_' + NOTEBOOK_NAME + '.h5'
 
 epoch = 30
@@ -164,10 +165,10 @@ print('Faulty case list : {}'.format(faulty_case))
 
 
 # acquire the .npy name
-data_size = len(glob.glob('./data/multi_' + str(max_size) + '/train/' + '*.npy'))
-TRAINS = ['./data/multi_' + str(max_size) + '/train/' + str(i) + '.npy' for i in range(data_size)]
+data_size = len(glob.glob('./data/multi_' + str(max_size) + '/train2/' + '*.npy'))
+TRAINS = ['./data/multi_' + str(max_size) + '/train2/' + str(i) + '.npy' for i in range(data_size)]
 # one-hot-encoding
-y = joblib.load('./data/multi_' + str(max_size) + '/train/y.pickle')
+y = joblib.load('./data/multi_' + str(max_size) + '/train2/y.pickle')
 new_y = to_categorical(y)
 # split test
 
@@ -294,7 +295,8 @@ x_validation = np.array(arr).reshape(len(x_validation), max_size, max_size, 3)
 
 
 def create_model():
-    with tf.distribute.MirroredStrategy(devices=["/gpu:0", "/gpu:1"], 
+    # with tf.distribute.MirroredStrategy(devices=["/gpu:0", "/gpu:1"], 
+    with tf.distribute.MirroredStrategy(devices=["/gpu:0", "/gpu:1", "/gpu:2", "/gpu:3"], 
                                         cross_device_ops = tf.distribute.HierarchicalCopyAllReduce()).scope():
         input_shape = (max_size, max_size, 3)
         input_tensor = Input(input_shape)
@@ -337,7 +339,7 @@ def create_model():
 # In[21]:
 
 
-strategy = tf.distribute.MirroredStrategy(devices=["/gpu:0", "/gpu:1", "device:XLA_GPU:0"], cross_device_ops = tf.distribute.HierarchicalCopyAllReduce())
+strategy = tf.distribute.MirroredStrategy(devices=["/gpu:0", "/gpu:1", "device:XLA_GPU:0"], cross_device_ops = tf.distribute.HierarchicalCopyAllReduce(2))
 print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
 
 
@@ -345,7 +347,7 @@ print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
 
 
 epoch=5
-batch_size=256
+batch_size=1024
 random.seed(1)
 
 
@@ -601,7 +603,7 @@ def line_notify_img(text, imgpath):
     }
     requests.post(url, data=data, files=files, headers=headers)#, proxies=proxies)
     
-line_notify("学習が終了しました " + NOTEBOOK_NAME)
+line_notify("学習が終了しました " + NOTEBOOK_NAME + str(max_size))
 # line_notify("Shawon: " + str(shawon) + ", rotation_num: " + str(rotation_num) + ", inversion: " + str(inversion) + ", trials: " + str(trials))
 line_notify_img("正解率", "multisize_accuracy.png")
 line_notify_img("Loss", "multisize_loss.png")

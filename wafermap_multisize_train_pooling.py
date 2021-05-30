@@ -85,10 +85,10 @@ warnings.filterwarnings("ignore")
 
 
 # Define
-max_size = 300
+max_size = 100
 encord_size = int(max_size / 2)
 
-NOTEBOOK_NAME = 'wafermap_multisize_train_pooling'
+NOTEBOOK_NAME = 'wafermap_multisize_train_pooling_script'
 cnn_path = './model/cnn_' + str(max_size) + '_' + NOTEBOOK_NAME + '.h5'
 
 epoch = 30
@@ -347,7 +347,7 @@ print('Number of devices: {}'.format(strategy.num_replicas_in_sync))
 # In[22]:
 
 
-epoch=5
+epoch=10
 batch_size=256
 random.seed(1)
 
