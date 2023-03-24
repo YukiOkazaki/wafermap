@@ -10,7 +10,7 @@ cupy-cuda102 = "*"
 pip = "*"
 memory-profiler = "*"
 tensorflow = "==2.2.0"
-tensorflow-gpu = "==2.2.0"
+tensorflow-gpu = "==2.12.0"
 numpy = "*"
 
 [dev-packages]
